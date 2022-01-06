@@ -1,5 +1,5 @@
 ﻿using Common;
-using MessageSender.Services;
+using MessageReceiver.Services;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +9,10 @@ var services = new ServiceCollection();
 ConfigureServices(services);
 var serviceProvider = services.BuildServiceProvider();
 
-var app = serviceProvider.GetService<SenderService>();
+var app = serviceProvider.GetService<ReceiverService>();
 if (app != null) await app.Run();
 
-//Console.Read();
+// Console.Read();
 
 static void ConfigureServices(IServiceCollection services)
 {
@@ -40,5 +40,5 @@ static void ConfigureServices(IServiceCollection services)
             .WithCredential(AzureCredentialBuilder.Credential());
     });
     
-    services.AddTransient<SenderService>();
+    services.AddTransient<ReceiverService>();
 }

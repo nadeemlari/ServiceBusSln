@@ -1,37 +1,45 @@
 ﻿using Azure.Messaging.ServiceBus;
+using Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace MessageSender.Services;
 
-
-//  var credential = new ChainedTokenCredential(new AzureCliCredential(),new ManagedIdentityCredential());
-// //var credential = new DefaultAzureCredential();
-// var serviceBusClient = new ServiceBusClient("mnl2022.servicebus.windows.net", credential);
-// var sender = serviceBusClient.CreateSender("test");
-// await sender.SendMessageAsync(new ServiceBusMessage("Test message"));
-//
-// Console.WriteLine("Hello, World!");
-
 public class SenderService
 {
     private readonly ILogger<SenderService> _logger;
+    // ReSharper disable once NotAccessedField.Local
     private readonly IConfiguration _configuration;
-    private readonly ServiceBusClient _serviceBusClient;
+    private readonly ServiceBusSender _serviceBusSender;
+    private List<Order> _orders;
 
     public SenderService( ILogger<SenderService> logger, IConfiguration configuration,ServiceBusClient serviceBusClient)
     {
          _configuration = configuration;
-         _serviceBusClient = serviceBusClient;
+         _serviceBusSender = serviceBusClient.CreateSender("test");
          _logger = logger;
+         _orders = new List<Order>
+         {
+             new Order {Id = 1, Name = "name 1", Qty = 2, Price = 3},
+             new Order {Id = 2, Name = "name 2", Qty = 4, Price = 6},
+             new Order {Id = 3, Name = "name 2", Qty = 6, Price = 9},
+         };
+
     }
 
     public async Task Run()
     {
         _logger.LogInformation("Starting...");
-
-        var sender = _serviceBusClient.CreateSender("test");
-        await sender.SendMessageAsync(new ServiceBusMessage("this is from console app"));
+        _orders.ForEach(o =>
+        {
+            var msg = new ServiceBusMessage(o.ToString())
+            {
+                ContentType = "application/json",
+                MessageId = "msg101"
+                
+            };
+            _serviceBusSender.SendMessageAsync(msg).GetAwaiter().GetResult();
+        });
 
         _logger.LogInformation("Finished!");
 

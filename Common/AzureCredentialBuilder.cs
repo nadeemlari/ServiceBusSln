@@ -1,7 +1,7 @@
 ﻿using Azure.Core;
 using Azure.Identity;
 
-namespace MessageSender;
+namespace Common;
 
 public static class AzureCredentialBuilder
 {
